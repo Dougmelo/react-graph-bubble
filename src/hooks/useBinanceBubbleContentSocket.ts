@@ -1,31 +1,30 @@
 import { useEffect, useState } from 'react';
 import useWebSocket, { ReadyState } from 'react-use-websocket';
+import axios, { Axios, AxiosResponse } from 'axios';
 
+const lastMessage = await axios.get("https://api.binance.com/api/v3/ticker/price")
 export interface Coin {
-  id: string;
-  value: number;
+  price: string;
+  symbol: string;
 }
-
 interface Ticker {
-  s: string;
-  c: string;
-  o: string;
+  price: string
+  symbol: string
 }
-
 interface BinanceSocket {
   connectionStatus: string;
   coinList: Coin[];
 }
 
+const useBinanceBubbleContentSocket = (): BinanceSocket => {
 
-
-const useBinanceBubbleContentSocket = ():BinanceSocket => {
   const socketUrl = "wss://stream.binance.com:9443/ws/!miniTicker@arr"
+
   const [coinList, setCoinList] = useState<Coin[]>([
-    { id: 'USDT', value: 5 },
+    { price: "123456", symbol: 'USDT' },
   ]);
 
-  const {lastMessage, readyState} = useWebSocket(socketUrl);
+  const { readyState } = useWebSocket(socketUrl);
 
   const connectionStatus = {
     [ReadyState.CONNECTING]: 'Connecting',
@@ -36,33 +35,37 @@ const useBinanceBubbleContentSocket = ():BinanceSocket => {
   }[readyState];
 
   useEffect(() => {
-    if(lastMessage !== null){
-      const tickers = JSON.parse(lastMessage.data);
-      const usdtTickersFiltered = tickers.filter((ticker: Ticker) => 
-        ticker.s.endsWith('USDT')
-        && !/^.{2,}(DOWNUSDT|UPUSDT)$/.test(ticker.s)
-      );
-      
-      let symbols: any = new Object();
 
-      usdtTickersFiltered.map((ticker: Ticker) => 
-        symbols[ticker.s] = (((parseFloat(ticker.c)*100)/parseFloat(ticker.o))-100));
-      
-      const newArrayCoin = Object.keys(symbols).map((symbol) => {
-        return {
-          id: symbol.replace('USDT', ''), value: symbols[symbol]
-        }
-      });
+    const coins: Coin[] = lastMessage.data
 
-      const newArrayCoinFilteredAndSorted: Coin[] = newArrayCoin.filter(
-        coin => Math.abs(coin.value) > 8
-      ).sort();
-        setCoinList(newArrayCoinFilteredAndSorted);
-      }
-  },[lastMessage])
- 
+    const BTCUSDT: Coin[] = coins.filter(
+      coin => coin.symbol == "BTCUSDT"
+    );
 
-  return {connectionStatus, coinList};
+    const BTCEUR: Coin[] = coins.filter(
+      coin => coin.symbol == "BTCEUR"
+    );
+
+    const BTCGBP: Coin[] = coins.filter(
+      coin => coin.symbol == "BTCGBP"
+    );
+
+    const allSymbols: Coin[] = [];
+
+    allSymbols.push(BTCUSDT[0]);
+    allSymbols.push(BTCEUR[0]);
+    allSymbols.push(BTCGBP[0]);
+
+    setCoinList(allSymbols);
+  }, [lastMessage])
+
+  return { connectionStatus, coinList };
 }
 
 export default useBinanceBubbleContentSocket;
+
+
+
+
+
+

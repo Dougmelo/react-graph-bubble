@@ -5,6 +5,7 @@ import useBinanceBubbleContentSocket from './hooks/useBinanceBubbleContentSocket
 
 function App() {
   const { connectionStatus, coinList } = useBinanceBubbleContentSocket()
+  
   return (
     <div className="App">
       <header className="App-header">
@@ -16,6 +17,7 @@ function App() {
       </header>
     </div>
   )
+  console.log("app: " + coinList)
 }
-
+console.log("saiuuuuuu: ")
 export default App

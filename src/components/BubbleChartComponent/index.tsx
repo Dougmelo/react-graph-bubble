@@ -8,23 +8,16 @@ interface BubbleChartComponentProps extends Coin {
 }
 
 const BubbleChartComponent = ({data}:{data:BubbleChartComponentProps[]}) => {
-  function isNegative(value:number){
-    return value<0?true:false;
+  function isNegative(value:string){
+    return true;
   }
   
   const renderData = data.map((coin:BubbleChartComponentProps) => {
-    if(isNegative(coin.value)){
-      return {
-        ...coin,
-        value: Math.abs(coin.value).toFixed(2),
-        label: coin.id,
-        color: "#ff0000",
-      }
-    }
+   
     return {
       ...coin,
-      value: Math.abs(coin.value).toFixed(2),
-      label: coin.id,
+      value: coin.price,
+      label: coin.symbol,
       color: '#61d661', 
     }
   })
